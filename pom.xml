@@ -49,14 +49,14 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/Event-Based-Banking-Application/arya-banking-common</url>
+            <url>https://maven.pkg.github.com/Event-Based-Banking-Application/arya-banking-maven-registry</url>
         </repository>
     </repositories>
 
     <distributionManagement>
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/Event-Based-Banking-Application/arya-banking-common</url>
+            <url>https://maven.pkg.github.com/Event-Based-Banking-Application/arya-banking-maven-registry</url>
         </repository>
     </distributionManagement>
 
