@@ -50,7 +50,12 @@ jobs:
       - name: Create and push tag
         if: github.event_name == 'push' && success()
         run: |
+          VERSION=${{ steps.get_version.outputs.version }}
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag "v${{ steps.get_version.outputs.version }}"
-          git push origin "v${{ steps.get_version.outputs.version }}"
+          if git ls-remote --tags origin "v$VERSION" | grep -q .; then
+            echo "Tag v$VERSION already exists on origin, skipping"
+          else
+            git tag "v$VERSION"
+            git push origin "v$VERSION"
+          fi
