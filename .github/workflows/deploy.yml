@@ -33,20 +33,36 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven
 
-      # Step 4: Build the project using the committed settings.xml
+      # Step 4: Check if this version is already published to the registry
+      - name: Check if version is already published
+        id: check_published
+        run: |
+          ARTIFACT=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          GROUP=$(mvn help:evaluate -Dexpression=project.groupId -q -DforceStdout | tr '.' '/')
+          URL="https://maven.pkg.github.com/Event-Based-Banking-Application/arya-banking-maven-registry/$GROUP/$ARTIFACT/$VERSION/$ARTIFACT-$VERSION.pom"
+          if curl -fsI "$URL" >/dev/null 2>&1; then
+            echo "Version $VERSION already published, skipping deploy"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Step 5: Build the project using the committed settings.xml
       - name: Build and Package the Application
+        if: steps.check_published.outputs.skip != 'true'
         run: mvn clean deploy -s settings.xml
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
 
-      # Step 5: Extract version from pom.xml
+      # Step 6: Extract version from pom.xml
       - name: Extract version from pom.xml
         id: get_version
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      # Step 6: Create and push tag
+      # Step 7: Create and push tag
       - name: Create and push tag
         if: github.event_name == 'push' && success()
         run: |
